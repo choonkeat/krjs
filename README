@@ -1,0 +1,53 @@
+= KRJS - Keat's RJS
+
+RJS is a great Ruby DSL to write javascript. However, its so tempting to write 
+RJS directly in the views, and soon the views would contain substantial controller knowledge (e.g. link_to_remote, link_to, etc)
+
+KRJS attempts to solve that problem by allowing dynamic inclusion of AJAX calls on HTML elements. When a controller defines a method (based on naming convention) that handles a client-side event, the rendering engine will do the wiring automatically - when the event happens, an AJAX call will be made to the controller's method which would ideally reply with RJS and update portions of the document.
+
+KRJS could potentially use behavior/selector style javascript instead of modifying elements itself - See http://www.lukeredpath.co.uk/index.php/2006/06/06/introducing-unobtrusive-javascript-for-rails and http://www.vivabit.com/bollocks/2006/02/09/rails-is-the-devil-in-your-client-side-shoulder.
+
+== Examples
+
+To see it in action, create a blank controller and a index.rhtml file:
+./script/generate controller Sample index
+
+In your view (app/views/sample/index.rhtml) write:
+  <%= form_tag({:action => 'submit'}, {:id => 'form'}) %>
+    <%= text_field 'account', 'login', :id => 'account-new-login' %><br />
+    <%= submit_tag 'Login' %>
+  <%= end_form_tag %>
+
+In your controller (app/controllers/sample_controller.rb), write:
+class SampleController < ApplicationController
+  def on_form_submit
+    render :update do |page|
+      page.insert_html :after, 'form', CGI.escapeHTML(params.inspect)
+    end
+  end
+end
+
+Go to your browser, load the page and click on the submit button. The form 
+should be submitted via ajax (not a fullpage refresh) and rjs code should
+update the page, right after the form (submit button)
+
+You can also try adding this method to the controller:
+  def on_account_login_blur
+    render :update do |page|
+      page.insert_html :after, 'form', CGI.escapeHTML(params.inspect)
+    end
+  end
+
+View the page again, type in something in the textfield, press the TAB key (to lose focus on the input field). An AJAX call should be made to your controller, and the respective RJS will update the page.
+
+== License
+
+KRJS is released under the MIT license.
+
+== Author
+
+Chew Choon Keat <choonkeat at gmail>
+http://blog.yanime.org/
+
+12 June 2006
+
