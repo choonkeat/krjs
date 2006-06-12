@@ -19,7 +19,7 @@ module ActionView
 
       # there might be a better splitting policy yet?
       def split_dom_id(dom_id)
-        dom_id.to_s.split(/-/)
+        dom_id.to_s.split(/-/) # based on convention of dashed_dom_id plugin
       end
   
       # given a dom_id, retrieve the defined controller method (if any)
@@ -29,14 +29,12 @@ module ActionView
         array = split_dom_id(dom_id)
         method_match = "on_#{array.first}_"
         method_match += "(#{array[2]}|field)_" if not array[2].nil?
-        method_found = ctrler.methods.find{|x| x =~ /^#{method_match}(.+)$/}
-        return nil if method_found.nil?
-        method_found
+        ctrler.methods.find{|x| x =~ /^#{method_match}(.+)$/}
       end
     
       def tag_options(options)
         # begin patch
-        viewer     = self.respond_to?(:controller) ? self : self.template_object
+        viewer = self.respond_to?(:controller) ? self : self.template_object
         method_name = controller_method(viewer.controller, options['id'])
         event_attr = "on#{$1}" if method_name =~ /_([^_]+)$/
         if method_name && event_attr && options[event_attr].nil? 
