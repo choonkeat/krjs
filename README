@@ -40,6 +40,17 @@ You can also try adding this method to the controller:
 
 View the page again, type in something in the textfield, press the TAB key (to lose focus on the input field). An AJAX call should be made to your controller, and the respective RJS will update the page.
 
+== Explanation
+
+Controller#on_XX_YY means the controller receives ajax requests when event "onYY" of element XX occurs. e.g. if YY is "focus", then the ajax request is sent during "onfocus" even of XX field.
+Controller#on_XX_YY_ZZ means the controller receives ajax requests when field XX is modified - changes are polled every ZZ seconds instead of waiting for event to occur.
+Note: if YY is 'form' or 'submit', XX is considered as a DOM ID for a form instead of a field.
+
+== Installation
+
+Go to your RAILS_ROOT directory and execute:
+./script/plugin install http://choonkeat.svnrepository.com/svn/rails-plugins/krjs
+
 == License
 
 KRJS is released under the MIT license.
