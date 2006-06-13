@@ -51,6 +51,11 @@ Note: if YY is 'form' or 'submit', XX is considered as a DOM ID for a form inste
 Go to your RAILS_ROOT directory and execute:
 ./script/plugin install http://choonkeat.svnrepository.com/svn/rails-plugins/krjs
 
+== Testing
+
+To test, go to your RAILS_ROOT directory and execute (1 line):
+PLUGIN=krjs; rake test:plugins
+
 == License
 
 KRJS is released under the MIT license.
