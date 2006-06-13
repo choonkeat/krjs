@@ -31,9 +31,19 @@ module ActionView
         method_match += "(#{array[2]}|field|submit)_" if not array[2].nil?
         ctrler.methods.find{|x| x =~ /^#{method_match}(.+)$/}
       end
+
+      # convenience method to obtain all 3 information
+      def viewer_method_eventattr(options)
+        viewer = self.respond_to?(:controller) ? self : self.template_object
+        method_name ||= controller_method(viewer.controller, options['id'])
+        event_attr ||= "on#{$1}" if method_name =~ /_([^_]+(|_\d+))$/
+        [viewer, method_name, event_attr]
+      end
           
       def tag_options(options, viewer = nil, method_name = nil, event_attr = nil)
-        # begin patch
+        # other tag helpers may call tag_options directly without tag, hence viewer
+        # would be nil - we're then be required to populate those values ourselves
+        viewer, method_name, event_attr = viewer_method_eventattr(options) if viewer.nil?
         if method_name && event_attr && options[event_attr].nil? 
           options[event_attr] = viewer.remote_function(
             :url => options.merge({
@@ -52,9 +62,7 @@ module ActionView
       end
       
       def tag(name, options = nil, open = false)
-        viewer = self.respond_to?(:controller) ? self : self.template_object
-        method_name = controller_method(viewer.controller, options['id'])
-        event_attr = "on#{$1}" if method_name =~ /_([^_]+(|_\d+))$/
+        viewer, method_name, event_attr = viewer_method_eventattr(options)
         appended = nil
         if event_attr =~ /^on(\w+)_(\d+)$/
           on_evt = $1
