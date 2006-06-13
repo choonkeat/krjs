@@ -22,7 +22,7 @@ In your controller (app/controllers/sample_controller.rb), write:
 class SampleController < ApplicationController
   def on_form_submit
     render :update do |page|
-      page.insert_html :after, 'form', CGI.escapeHTML(params.inspect)
+      page.insert_html :after, params[:dom_id], CGI.escapeHTML(params.inspect)
     end
   end
 end
@@ -34,7 +34,7 @@ update the page, right after the form (submit button)
 You can also try adding this method to the controller:
   def on_account_login_blur
     render :update do |page|
-      page.insert_html :after, 'form', CGI.escapeHTML(params.inspect)
+      page.insert_html :after, params[:dom_id], CGI.escapeHTML(params.inspect)
     end
   end
 
@@ -44,7 +44,7 @@ View the page again, type in something in the textfield, press the TAB key (to l
 
 Controller#on_XX_YY means the controller receives ajax requests when event "onYY" of element XX occurs. e.g. if YY is "focus", then the ajax request is sent during "onfocus" even of XX field.
 Controller#on_XX_YY_ZZ means the controller receives ajax requests when field XX is modified - changes are polled every ZZ seconds instead of waiting for event to occur.
-Note: if YY is 'form' or 'submit', XX is considered as a DOM ID for a form instead of a field.
+Note: if YY is 'form' or 'submit', XX is considered as a DOM ID for a form instead of a field. This impacts the :with parameter. i.e. for a field, the value is submitted; for a form, the whole form is submitted
 
 == Installation
 

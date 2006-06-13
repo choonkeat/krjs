@@ -29,7 +29,10 @@ module ActionView
         array = split_dom_id(dom_id)
         method_match = "on_#{array.first}_"
         method_match += "(#{array[2]}|field|submit)_" if not array[2].nil?
-        ctrler.methods.find{|x| x =~ /^#{method_match}(.+)$/}
+        regexp = Regexp.new("^#{Regexp.escape(method_match)}(.+)$")
+        ret = ctrler.methods.find{|x| x =~ regexp }
+        # ctrler.logger.debug "match '#{method_match}' finds '#{ret}'"
+        ret
       end
 
       # convenience method to obtain all 3 information
