@@ -1,9 +1,6 @@
 # KRJS (keat's rails java script)
 #
 # MIT license
-#
-
-require 'action_view/helpers/tag_helper'
 
 module ActionView
   module Helpers
@@ -27,9 +24,9 @@ module ActionView
       def controller_method(ctrler, dom_id, tag = nil)
         return nil if dom_id.nil?
         array = split_dom_id(dom_id)
-        method_match = "on_#{array.first}_"
-        method_match += "(#{array[2]}|field|submit)_" if not array[2].nil?
-        regexp = Regexp.new("^#{Regexp.escape(method_match)}(.+)$")
+        method_match = "on_#{Regexp.escape(array.first)}_"
+        method_match += "(#{Regexp.escape(array[2])}|field|submit)_" if not array[2].nil?
+        regexp = Regexp.new("^#{method_match}(.+)$")
         ret = ctrler.methods.find{|x| x =~ regexp }
         # ctrler.logger.debug "match '#{method_match}' finds '#{ret}'"
         ret

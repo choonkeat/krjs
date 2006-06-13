@@ -1,0 +1,8 @@
+<%= form_tag({:action => 'submit'}, {:id => 'form'}) %>
+  Login: <%= text_field 'account', 'login', :id => 'account-new-login' %><br />
+  Password: <%= password_field_tag 'account[password]', nil, 
+        :id => 'account-new-password' %><br />
+  <%= check_box_tag 'remember' %> Remember login?<br />
+  <p />
+  <%= submit_tag 'Login' %>
+<%= end_form_tag %> 

@@ -1,0 +1,7 @@
+p do
+  form_for nil, @obj, :html => {:id => 'dom'} do 
+    text_field_tag dom_id('account', 5, 'login')
+    br
+    link_to 'New product', :action => 'new'
+  end
+end

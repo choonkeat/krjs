@@ -1,0 +1,2 @@
+page.insert_html :after, 'form', CGI.escapeHTML(params.inspect)
+
