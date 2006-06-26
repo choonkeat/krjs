@@ -55,6 +55,9 @@ class KrjsTest < Test::Unit::TestCase
 
     assert_not_ajaxified 'account-new-password', 'change', 'password onchange'
     assert_ajaxified 'account-new-password', 'observe', 'password onchange'
+
+    assert_not_ajaxified 'remember', 'blur', 'remember onblur'
+    assert_ajaxified 'remember', 'change', 'remember onchange'
   end
 
   def assert_ajaxified(dom_id, event, assert_comments=nil)

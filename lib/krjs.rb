@@ -21,6 +21,8 @@ module ActionView
   
       # given a dom_id, retrieve the defined controller method (if any)
       # e.g. on_student_submit, on_student_name_change, on_student_grade_focus
+      # if the controller has no methods of such naming conventions, we'll look
+      # to see if there are view templates of such filenames
       def controller_method(ctrler, dom_id, tag = nil)
         return nil if dom_id.nil?
         array = split_dom_id(dom_id)
@@ -29,6 +31,13 @@ module ActionView
         regexp = Regexp.new("^#{method_match}(.+)$")
         ret = ctrler.methods.find{|x| x =~ regexp }
         # ctrler.logger.debug "match '#{method_match}' finds '#{ret}'"
+        if ret.nil? && self.respond_to?(:base_path)
+          view_path = File.join(self.base_path, ctrler.controller_name)
+          # ctrler.logger.debug "looking to match within #{view_path}"
+          Dir.open(view_path) do |dir|
+            ret = dir.find{|x| x =~ regexp }.to_s.gsub(/\.[^\.]+$/, '')
+          end unless not File.exist? view_path
+        end
         ret
       end
 
