@@ -16,6 +16,7 @@ module ActionView
 
       # there might be a better splitting policy yet?
       def split_dom_id(dom_id)
+        dom_id = dom_id.tr('[]','')
         dom_id.to_s.split(/-/) # based on convention of dashed_dom_id plugin
       end
   
