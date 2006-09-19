@@ -9,12 +9,16 @@ ENV["RAILS_ENV"] = "test"
 require 'test_help'
 
 ActionController::Routing::Routes.draw do |map|
-      map.connect ':controller/:action/:id'
+  map.connect ':controller/:action/:id'
 end
 
 class SampleController < ActionController::Base
 
   def index
+  end
+  
+  def alternate_index
+    render :action => 'index'
   end
 
   def on_form_submit
@@ -47,7 +51,7 @@ class KrjsTest < Test::Unit::TestCase
     @response   = ActionController::TestResponse.new
   end
 
-  def test_this_plugin
+  def test_basic
     get :index
     assert_not_ajaxified 'form', 'change', 'form submit'
     assert_ajaxified 'form', 'submit', 'form submit'
@@ -62,6 +66,18 @@ class KrjsTest < Test::Unit::TestCase
     assert_ajaxified 'remember', 'change', 'remember onchange'
   end
 
+  def test_optional_action
+    
+  end
+
+  def test_optional_callback
+    
+  end
+
+
+
+
+protected
   def assert_ajaxified(dom_id, event, assert_comments=nil)
     assert @response.body =~ /(\<[^\>]+ id="#{Regexp.escape(dom_id.to_s)}".*?\>(<script |))/m, "Cannot find #{Regexp.escape(dom_id.to_s)} in #{$1}\n\n#{@response.body}"
     tag = $1
