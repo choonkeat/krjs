@@ -38,6 +38,18 @@ class SampleController < ActionController::Base
       page.insert_html :after, params[:dom_id], CGI.escapeHTML(params.inspect)
     end
   end
+  
+  def on_account_comments_change
+    render :update do |page|
+      page.insert_html :after, params[:dom_id], CGI.escapeHTML(params.inspect)
+    end
+  end
+  
+  def on_account_country_change_9
+    render :update do |page|
+      page.insert_html :after, params[:dom_id], CGI.escapeHTML(params.inspect)
+    end
+  end
 
 end
 SampleController.template_root = File.join(File.dirname(__FILE__), 'views')
@@ -62,8 +74,15 @@ class KrjsTest < Test::Unit::TestCase
     assert_not_ajaxified 'account-new-password', 'change', 'password onchange'
     assert_ajaxified 'account-new-password', 'observe', 'password onchange'
 
+    # external .rjs file
     assert_not_ajaxified 'remember', 'blur', 'remember onblur'
     assert_ajaxified 'remember', 'change', 'remember onchange'
+    
+    assert_not_ajaxified 'account_comments', 'blur', 'account_comments onblur'
+    assert_ajaxified 'account_comments', 'change', 'account_comments onchange'    
+
+    assert_not_ajaxified 'account_country', 'change', 'account_country onblur'
+    assert_ajaxified 'account_country', 'observe', 'account_country observe'    
   end
 
   def test_optional_action
@@ -82,7 +101,7 @@ protected
     tag, observer = rendered_html(dom_id, event)
     case event
     when 'observe'
-      assert(observer, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
+      assert(!observer.blank?, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
     else
       assert((tag =~ / on#{event}\=/), "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
     end
@@ -92,7 +111,7 @@ protected
     tag, observer = rendered_html(dom_id, event)
     case event
     when 'observe'
-      assert_nil(observer, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
+      assert(observer.blank?, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
     else
       assert_nil((tag =~ / on#{event}\=/), "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
     end
@@ -102,6 +121,11 @@ protected
   # first element is the tag of the dom_id: e.g. "<form id='thisform'.... >" if dom_id is "thisform"
   # second element (nillable) is the '<script ... </script>' appended to the tag by rjs if its an observed field
   def rendered_html(dom_id, event)
+    if @response.body =~ /(\<([^\>]+) id="#{Regexp.escape(dom_id.to_s)}".*?\>(.+\2>\s*<script))/m
+        # matches <select>... </select><script
+        tag = $2
+        return tag, $1 if $3 =~ /\/#{tag}>(.+)/
+    end
     assert @response.body =~ /(\<[^\>]+ id="#{Regexp.escape(dom_id.to_s)}".*?\>(<script |))/m, "Cannot find #{Regexp.escape(dom_id.to_s)} in #{$1}\n\n#{@response.body}"
     return $1, $2
   end

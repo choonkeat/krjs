@@ -3,6 +3,13 @@
   Password: <%= password_field_tag 'account[password]', nil, 
         :id => 'account-new-password' %><br />
   <%= check_box_tag 'remember' %> Remember login?<br />
+  
+  Comments?
+  <%= text_area 'account', 'comments' %><br />
+  
+  Country:
+  <%= select 'account', 'country', ['US', 'Canada', 'Others'] %><br />
+
   <p />
   <%= submit_tag 'Login' %>
 <%= end_form_tag %> 

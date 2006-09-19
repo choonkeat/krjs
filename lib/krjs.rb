@@ -5,13 +5,21 @@
 module ActionView
   module Helpers
     class InstanceTag
+      include JavascriptHelper
+      
       # reader method used by TagHelper below..
       def template_object
         @template_object
       end
+      
+      # required by JavascriptHelper
+      def url_for(options)
+        template_object.url_for(options)
+      end
     end
   
-    module TagHelper
+    [TagHelper, InstanceTag].each do |klass|
+      klass.class_eval do 
       include PrototypeHelper # this isn't so good?
 
       # there might be a better splitting policy yet?
@@ -71,7 +79,7 @@ module ActionView
           ' ' + cleaned_options.map {|key, value| %(#{key}="#{html_escape(value.to_s)}")}.sort * ' ' unless cleaned_options.empty?
       end
       
-      def tag(name, options = nil, open = false)
+      def krjs_filter(name, options)
         viewer, method_name, event_attr = viewer_method_eventattr(options)
         appended = nil
         if event_attr =~ /^on(\w+)_(\d+)$/
@@ -97,8 +105,19 @@ module ActionView
           end
           method_name = nil; event_attr = nil # let tag_options behave normally
         end
-        "<#{name}#{tag_options(options.stringify_keys, viewer, method_name, event_attr) if options}" + (open ? ">" : " />") + appended.to_s
+        return "#{name}#{tag_options(options.stringify_keys, viewer, method_name, event_attr) if options}", appended
       end
+            
+      def tag(name, options = {}, open = false)
+        html, appended = krjs_filter(name, options)
+        return "<#{html}" + (open ? ">" : " />") + appended.to_s
+      end
+    
+      def content_tag(name, content, options = {})
+        html, appended = krjs_filter(name, options)
+        return "<#{html}>#{content}</#{name}>" + appended.to_s
+      end
+    end
     end
   end 
 end
