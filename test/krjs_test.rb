@@ -1,10 +1,16 @@
 require 'rubygems'
+require_gem "rails"
+require 'initializer'
 require 'test/unit'
-require 'action_controller/base'
 require 'action_controller/test_process'
-require 'action_view/helpers/tag_helper'
-require File.dirname(__FILE__) + '/../../../../test/test_helper'
 require File.dirname(__FILE__) + '/../lib/krjs'
+
+ENV["RAILS_ENV"] = "test"
+require 'test_help'
+
+ActionController::Routing::Routes.draw do |map|
+      map.connect ':controller/:action/:id'
+end
 
 class SampleController < ActionController::Base
 
@@ -29,10 +35,6 @@ class SampleController < ActionController::Base
     end
   end
 
-  alias :public_render_to_string :render_to_string
-  def render_to_string(*args)
-    public_render_to_string(*args)
-  end
 end
 SampleController.template_root = File.join(File.dirname(__FILE__), 'views')
 
