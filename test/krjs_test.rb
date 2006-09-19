@@ -79,9 +79,7 @@ class KrjsTest < Test::Unit::TestCase
 
 protected
   def assert_ajaxified(dom_id, event, assert_comments=nil)
-    assert @response.body =~ /(\<[^\>]+ id="#{Regexp.escape(dom_id.to_s)}".*?\>(<script |))/m, "Cannot find #{Regexp.escape(dom_id.to_s)} in #{$1}\n\n#{@response.body}"
-    tag = $1
-    observer = $2
+    tag, observer = rendered_html(dom_id, event)
     case event
     when 'observe'
       assert(observer, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
@@ -91,15 +89,21 @@ protected
   end
 
   def assert_not_ajaxified(dom_id, event, assert_comments=nil)
-    assert @response.body =~ /(\<[^\>]+ id="#{Regexp.escape(dom_id.to_s)}".*?\>(<script |))/m, "Cannot find #{Regexp.escape(dom_id.to_s)} in #{$1}\n\n#{@response.body}"
-    tag = $1
-    observer = $2
+    tag, observer = rendered_html(dom_id, event)
     case event
     when 'observe'
       assert_nil(observer, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
     else
       assert_nil((tag =~ / on#{event}\=/), "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
     end
+  end
+  
+  # returns an array, 
+  # first element is the tag of the dom_id: e.g. "<form id='thisform'.... >" if dom_id is "thisform"
+  # second element (nillable) is the '<script ... </script>' appended to the tag by rjs if its an observed field
+  def rendered_html(dom_id, event)
+    assert @response.body =~ /(\<[^\>]+ id="#{Regexp.escape(dom_id.to_s)}".*?\>(<script |))/m, "Cannot find #{Regexp.escape(dom_id.to_s)} in #{$1}\n\n#{@response.body}"
+    return $1, $2
   end
 
 end
