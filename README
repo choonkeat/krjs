@@ -56,6 +56,13 @@ Go to your RAILS_ROOT directory and execute:
 To test, go to your RAILS_ROOT directory and execute (1 line):
 PLUGIN=krjs; rake test:plugins
 
+To be sure you test only KRJS, do it on a clean RAILS directory:
+$ rails test_directory
+$ cd test_directory
+$ script/plugin install \
+    http://choonkeat.svnrepository.com/svn/rails-plugins/krjs
+$ PLUGIN=krjs; rake test:plugins
+
 == License
 
 KRJS is released under the MIT license.
