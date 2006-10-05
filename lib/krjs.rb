@@ -69,7 +69,7 @@ module ActionView
               :dom_id => options['id'],
               :dom_index => split_dom_id(options['id'])[1],
             }), 
-            :with => (event_attr =~ /submit/ ? 'Form.serialize(this)' : "'dom_value=' + this.value")
+            :with => (event_attr =~ /submit/ ? 'Form.serialize(this)' : "'dom_value=' + escape(this.value)")
           ) + "; return false;" 
           # return false is important to neuter the browser event
         end
@@ -98,7 +98,7 @@ module ActionView
             appended = observe_form(options['id'], observe_options)
           else
             appended = observe_field(options['id'], observe_options.merge({
-                :with => "'dom_value=' + $('#{options['id']}').value",
+                :with => "'dom_value=' + escape($('#{options['id']}').value)",
                 :on => on_evt,
                 })
             )
