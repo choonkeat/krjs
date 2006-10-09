@@ -1,0 +1,14 @@
+<html><head>
+  <%= javascript_include_tag :defaults %>
+</head><body>
+
+<%= form_tag( {:action => 'submit'}, {:id => 'test_krjs_form'}) %>
+<label for="object_value">Value : </label>
+<%= text_field 'object', 'value' %><br/>
+<label for="state">State : </label>
+<%= text_field_tag 'state'%><br/>
+
+<%= submit_tag "Save" %>
+<%= end_form_tag %>
+
+</body></html>

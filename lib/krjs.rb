@@ -62,14 +62,16 @@ module ActionView
         # other tag helpers may call tag_options directly without tag, hence viewer
         # would be nil - we're then be required to populate those values ourselves
         viewer, method_name, event_attr = viewer_method_eventattr(options) if viewer.nil?
-        if method_name && event_attr && options[event_attr].nil? 
+        if method_name && event_attr && options[event_attr].nil?
           options[event_attr] = viewer.remote_function(
             :url => options.merge({
               :action => method_name, 
               :dom_id => options['id'],
               :dom_index => split_dom_id(options['id'])[1],
             }), 
-            :with => (event_attr =~ /submit/ ? 'Form.serialize(this)' : "'dom_value=' + escape(this.value)")
+            :with => (event_attr =~ /submit/ || options['id'].to_s =~ /form/ ? 
+              'Form.serialize(this)' : 
+              "'dom_value=' + escape(this.value)")
           ) + "; return false;" 
           # return false is important to neuter the browser event
         end

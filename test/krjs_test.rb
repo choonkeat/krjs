@@ -21,6 +21,10 @@ class SampleController < ActionController::Base
     render :action => 'index'
   end
 
+  def on_test_krjs_form_change
+    # whole form will be submitted here
+  end
+
   def on_form_submit
     render :update do |page|
       page.insert_html :after, params[:dom_id], CGI.escapeHTML(params.inspect)
@@ -83,6 +87,12 @@ class KrjsTest < Test::Unit::TestCase
 
     assert_not_ajaxified 'account_country', 'change', 'account_country onblur'
     assert_ajaxified 'account_country', 'observe', 'account_country observe'    
+  end
+
+  def test_form
+    get :form_test
+    assert @response.body =~ /Form.serialize/, "Ajaxified form must submit as whole, not merely dom_value"
+    assert_ajaxified 'test_krjs_form', 'change', 'on_test_krjs_form_change'
   end
 
   def test_optional_action
