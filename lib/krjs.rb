@@ -54,7 +54,9 @@ module ActionView
       def viewer_method_eventattr(options)
         viewer = self.respond_to?(:controller) ? self : self.template_object
         method_name ||= controller_method(viewer.controller, options['id'])
+        # viewer.controller.logger.debug "using method_name #{method_name.inspect}" if method_name
         event_attr ||= "on#{$1}" if method_name =~ /_([^_]+(|_\d+))$/
+        # viewer.controller.logger.debug "using event_attr #{event_attr.inspect}" if event_attr
         [viewer, method_name, event_attr]
       end
           
@@ -62,17 +64,18 @@ module ActionView
         # other tag helpers may call tag_options directly without tag, hence viewer
         # would be nil - we're then be required to populate those values ourselves
         viewer, method_name, event_attr = viewer_method_eventattr(options) if viewer.nil?
-        if method_name && event_attr && options[event_attr].nil?
+        if method_name && event_attr && options[event_attr].nil? 
+          # viewer.controller.logger.debug "options before: #{options.inspect}"
           options[event_attr] = viewer.remote_function(
-            :url => options.merge({
+            :url => HashWithIndifferentAccess.new(options).merge({
               :action => method_name, 
               :dom_id => options['id'],
               :dom_index => split_dom_id(options['id'])[1],
             }), 
-            :with => (event_attr =~ /submit/ || options['id'].to_s =~ /form/ ? 
-              'Form.serialize(this)' : 
-              "'dom_value=' + escape(this.value)")
+            :with => (event_attr =~ /submit/ || method_name =~ /form/ ? 
+                      'Form.serialize(this)' : "'dom_value=' + escape(this.value)")
           ) + "; return false;" 
+          # viewer.controller.logger.debug "options after: #{options.inspect}"
           # return false is important to neuter the browser event
         end
         # end patch
@@ -87,15 +90,15 @@ module ActionView
         if event_attr =~ /^on(\w+)_(\d+)$/
           on_evt = $1
           freq = $2
-          observe_options = {
-            :url => options.merge({
+          observe_options = HashWithIndifferentAccess.new({
+            :url => HashWithIndifferentAccess.new(options).merge({
               :action => method_name, 
               :dom_id => options['id'],
               :dom_index => split_dom_id(options['id'])[1],
             }), 
             :with => "'dom_value=' + Form.serialize($('#{options['id']}'))",
             :frequency => freq.to_i,
-          }          
+          })
           if on_evt =~ /(form|submit)/
             appended = observe_form(options['id'], observe_options)
           else

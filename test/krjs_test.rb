@@ -1,5 +1,5 @@
 require 'rubygems'
-require_gem "rails"
+require File.expand_path(File.dirname(__FILE__) + "/../../../../config/environment")
 require 'initializer'
 require 'test/unit'
 require 'action_controller/test_process'
