@@ -1,28 +1,16 @@
-require 'rubygems'
-require File.expand_path(File.dirname(__FILE__) + "/../../../../config/environment")
-require 'initializer'
-require 'test/unit'
-require 'action_controller/test_process'
-require File.dirname(__FILE__) + '/../lib/krjs'
+require File.dirname(__FILE__) + '/test_helper'
 
-ENV["RAILS_ENV"] = "test"
-require 'test_help'
-
-ActionController::Routing::Routes.draw do |map|
-  map.connect ':controller/:action/:id'
-end
+class FakeView < ActionView::Base;end
 
 class SampleController < ActionController::Base
-
-  def index
+  def index;
   end
   
-  def alternate_index
-    render :action => 'index'
+  def alternate_index;
+    render :action => 'index';
   end
 
-  def on_test_krjs_form_change
-    # whole form will be submitted here
+  def on_test_krjs_form_change; # whole form will be submitted here;
   end
 
   def on_form_submit
@@ -57,7 +45,9 @@ class SampleController < ActionController::Base
 
 end
 SampleController.template_root = File.join(File.dirname(__FILE__), 'views')
-
+ActionController::Routing::Routes.draw do |map|
+  map.connect ':controller/:action/:id'
+end
 
 class KrjsTest < Test::Unit::TestCase
 
@@ -65,6 +55,16 @@ class KrjsTest < Test::Unit::TestCase
     @controller = SampleController.new
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
+
+    @fakeview = FakeView.new  # a view to test the TagHelper methods have ben chained
+  end
+
+  def test_presence_of_instance_methods
+    %w{tag_options tag_options_with_remote_function tag_options_without_remote_function
+         tag tag_with_observer tag_without_observer
+         content_tag content_tag_with_observer content_tag_without_observer}.each do |instance_method|
+      assert_respond_to @fakeview, instance_method
+    end
   end
 
   def test_basic
@@ -103,17 +103,15 @@ class KrjsTest < Test::Unit::TestCase
     
   end
 
-
-
-
 protected
+
   def assert_ajaxified(dom_id, event, assert_comments=nil)
-    tag, observer = rendered_html(dom_id, event)
+    ttag, observer = rendered_html(dom_id, event)
     case event
     when 'observe'
-      assert(!observer.blank?, "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
+      assert(!observer.blank?, "#{assert_comments}\n#{ttag} #{observer}\n\n#{@response.body}")
     else
-      assert((tag =~ / on#{event}\=/), "#{assert_comments}\n#{tag} #{observer}\n\n#{@response.body}")
+      assert((ttag =~ / on#{event}\=/), "#{assert_comments}\n#{ttag} #{observer}\n\n#{@response.body}")
     end
   end
 
