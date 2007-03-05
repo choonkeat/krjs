@@ -124,6 +124,7 @@ module Krjs
       # convenience method to obtain all 3 information
       def viewer_method_eventattr(options)
         viewer = self.respond_to?(:controller) ? self : @template_object
+        return [] unless viewer
         method_name ||= controller_method(viewer.controller, options['id'])
         event_attr ||= "on#{$1}" if method_name =~ /_([^_]+(|_\d+))$/
         [viewer, method_name, event_attr]
