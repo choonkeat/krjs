@@ -42,7 +42,7 @@ module Krjs
               :dom_index => split_dom_id(options['id'])[1],
             }), 
             :with => (event_attr =~ /submit/ || method_name =~ /form/ ? 
-                      'Form.serialize(this)' : "'dom_value=' + escape(this.value)")
+                      'Form.serialize(this)' : "'dom_value=' + encodeURIComponent(this.value)")
           ) + "; return false;" 
         end
         return tag_options_without_remote_function(options)
@@ -85,7 +85,7 @@ module Krjs
             appended = observe_form(options['id'], observe_options)
           else
             appended = observe_field(options['id'], observe_options.merge({
-                :with => "'dom_value=' + escape($('#{options['id']}').value)",
+                :with => "'dom_value=' + encodeURIComponent($('#{options['id']}').value)",
                 :on => on_evt,
                 })
             )
