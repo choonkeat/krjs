@@ -96,8 +96,8 @@ module Krjs
             
       # there might be a better splitting policy yet?
       def split_dom_id(dom_id)
-        dom_id = dom_id.tr('[]', '')
-        dom_id.to_s.split(/-/) # based on convention of dashed_dom_id plugin
+        dom_id = dom_id.to_s.tr('[]', '')
+        dom_id.split(/-/) # based on convention of dashed_dom_id plugin
       end
     
       # given a dom_id, retrieve the defined controller method (if any)
