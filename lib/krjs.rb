@@ -3,19 +3,30 @@
 # MIT license
 
 module Krjs
+  # brought over from tag_helper (exist after 2.0.1)
+  BOOLEAN_ATTRIBUTES = Set.new(%w(disabled readonly multiple))
+
   def self.included(base)
     base.class_eval do
-
+      
       # just a public copy of the original tag options
       # we need to overwrite this because InstanceTag and TagHelper
       # are already bound to its private version.
       # without this the alias_method_chain seems not to work well
-      def tag_options(options)
-        cleaned_options = options.reject { |key, value| value.nil? }
-        unless cleaned_options.empty?
-          " " + cleaned_options.symbolize_keys.map { |key, value|
-            %(#{key}="#{html_escape(value.to_s)}")
-          }.sort.join(" ")
+      def tag_options(options, escape = true)
+        unless options.blank?
+          attrs = []
+          if escape
+            options.each do |key, value|
+              next unless value
+              key = key.to_s
+              value = ::Krjs::BOOLEAN_ATTRIBUTES.include?(key) ? key : escape_once(value)
+              attrs << %(#{key}="#{value}")
+            end
+          else
+            attrs = options.map { |key, value| %(#{key}="#{value}") }
+          end
+          " #{attrs.sort * ' '}" unless attrs.empty?
         end
       end
 
@@ -32,7 +43,7 @@ module Krjs
       end
 
       # adds a remote function to the options if needed
-      def tag_options_with_remote_function(options)
+      def tag_options_with_remote_function(options, escape = true)
         viewer, method_name, event_attr = viewer_method_eventattr(options) #unless options.include?
         if method_name && event_attr && options[event_attr].nil? 
           options[event_attr] = remote_function(
@@ -42,17 +53,17 @@ module Krjs
               :dom_index => split_dom_id(options['id'])[1],
             }), 
             :with => (event_attr =~ /submit/ || method_name =~ /form/ ? 
-                      'Form.serialize(this)' : "'dom_value=' + encodeURIComponent(this.value)")
+                      '(window.Form ? Form.serialize(this) : jQuery(this).serialize())' : "'dom_value=' + encodeURIComponent(this.value)")
           ) + "; return false;" 
         end
-        return tag_options_without_remote_function(options)
+        return tag_options_without_remote_function(options, escape = true)
       end
       
       # chain the new methods with the old ones
 
       # tag => tag_with_observer
       # original tag => tag_without_observer
-      alias_method_chain :tag, :observer
+      # alias_method_chain :tag, :observer
 
       # content_tag => content_tag_with_observer
       # original content_tag => content_tag_without_observer
@@ -113,10 +124,10 @@ module Krjs
         ret = ctrler.methods.find{|x| x =~ regexp }
 
         if ret.nil? && self.respond_to?(:base_path)
-          view_path = File.join(self.base_path, ctrler.controller_name)
+          view_path = File.join(self.base_path, ctrler.controller_name) unless [self.base_path, ctrler.controller_name].include?(nil)
           Dir.open(view_path) do |dir|
             ret = dir.find{|x| x =~ regexp }.to_s.gsub(/\.[^\.]+$/, '')
-          end unless not File.exist? view_path
+          end unless view_path.blank? || !(File.exist? view_path)
         end
         ret
       end
@@ -130,7 +141,7 @@ module Krjs
         [viewer, method_name, event_attr]
       end
     end
-  end 
+  end
 end
 
 module ActionView
@@ -139,7 +150,13 @@ module ActionView
       include Krjs
     end
     class InstanceTag
-      def url_for(options); @template_object.url_for(options); end
+      def method_missing(method, *args)
+        if @template_object && @template_object.respond_to?(method)
+          @template_object.send method, *args
+        else
+          super
+        end
+      end
       include JavascriptHelper
       include PrototypeHelper
       include Krjs
